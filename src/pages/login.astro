@@ -6,98 +6,6 @@
   <head>
     <meta charset="UTF-8" />
     <title>Login</title>
-    <script is="module">
-      // Login form submission
-      async function handleLogin(event) {
-        event.preventDefault();
-
-        const email = document.getElementById("email").value;
-        const password = document.getElementById("password").value;
-        const errorEl = document.getElementById("error");
-
-        errorEl.innerText = "Loading...";
-
-        try {
-          const res = await fetch("http://127.0.0.1:8000/api/login", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ email, password }),
-          });
-
-          const data = await res.json();
-
-          if (!res.ok) {
-            throw new Error(data.message || "Login gagal");
-          }
-
-          // simpan token
-          localStorage.setItem("token", data.token);
-
-          errorEl.innerText = "Login berhasil!";
-
-          // redirect (misal ke dashboard)
-          window.location.href = "/dashboard";
-        } catch (err) {
-          errorEl.innerText = err.message;
-        }
-      }
-    </script>
-
-    <style>
-      body {
-        font-family: sans-serif;
-        background: #0f172a;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        color: white;
-      }
-
-      .card {
-        background: #1e293b;
-        padding: 2rem;
-        border-radius: 12px;
-        width: 300px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-      }
-
-      h2 {
-        text-align: center;
-        margin-bottom: 1rem;
-      }
-
-      input {
-        width: 100%;
-        padding: 10px;
-        margin: 8px 0;
-        border-radius: 6px;
-        border: none;
-      }
-
-      button {
-        width: 100%;
-        padding: 10px;
-        background: #38bdf8;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        font-weight: bold;
-      }
-
-      button:hover {
-        background: #0ea5e9;
-      }
-
-      .error {
-        margin-top: 10px;
-        font-size: 14px;
-        text-align: center;
-        color: #f87171;
-      }
-    </style>
   </head>
 
   <body>
@@ -116,3 +24,96 @@
     </div>
   </body>
 </html>
+
+<script is="module">
+  // Login form submission
+  async function handleLogin(event) {
+    event.preventDefault();
+
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    const errorEl = document.getElementById("error");
+
+    errorEl.innerText = "Loading...";
+
+    try {
+      const res = await fetch("http://trade-blog-api.test/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Login gagal");
+      }
+
+      // simpan token
+      localStorage.setItem("token", data.token);
+
+      errorEl.innerText = "Login berhasil!";
+
+      // redirect (misal ke dashboard)
+      window.location.href = "/dashboard";
+    } catch (err) {
+      errorEl.innerText = err.message;
+    }
+  }
+</script>
+
+<style>
+  body {
+    font-family: sans-serif;
+    background: #0f172a;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    color: white;
+  }
+
+  .card {
+    background: #1e293b;
+    padding: 2rem;
+    border-radius: 12px;
+    width: 300px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  }
+
+  h2 {
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+
+  input {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border-radius: 6px;
+    border: none;
+  }
+
+  button {
+    width: 100%;
+    padding: 10px;
+    background: #38bdf8;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  button:hover {
+    background: #0ea5e9;
+  }
+
+  .error {
+    margin-top: 10px;
+    font-size: 14px;
+    text-align: center;
+    color: #f87171;
+  }
+</style>

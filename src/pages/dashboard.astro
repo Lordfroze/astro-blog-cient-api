@@ -1,19 +1,72 @@
 ---
-import MainLayout from "../layouts/MainLayout.astro";
-const response = await fetch("http://127.0.0.1:8000/api/posts");
-const data = await response.json();
+
 ---
 
-<MainLayout title="index page ">
-  <h1>Astro</h1>
-  <p>Selamat datang di Astro Blog</p>
-  {data}
-</MainLayout>
+<html>
+  <head>
+    <title>Dashboard</title>
+  </head>
+  <body>
+    <h2>Dashboard - Posts</h2>
 
-<script is:inline>
-  const token = localStorage.getItem("token");
+    <div id="posts">Loading...</div>
 
-  if (!token) {
-    window.location.href = "/login";
-  }
-</script>
+    <script is="module">
+      const postsContainer = document.getElementById("posts");
+
+      async function fetchPosts() {
+        try {
+          // ambil token dari localStorage
+          const token = localStorage.getItem("token");
+
+          // fetch posts dari API
+          const res = await fetch("http://trade-blog-api.test/api/posts", {
+            method: "GET",
+            headers: {
+              Accept: "application/json",
+              Authorization: "Bearer " + token,
+            },
+          });
+
+          // cek status response, jika tidak ok, tampilkan pesan error
+          if (!res.ok) {
+            postsContainer.innerText = "Gagal ambil data (unauthorized?)";
+            return;
+          }
+
+          // parse response ke JSON
+          const result = await res.json();
+          console.log(result);
+
+          // ambil data posts dari response
+          // jika tidak ada data, tampilkan pesan "Belum ada post"
+          const posts = result.data || result;
+
+          if (!posts.length) {
+            postsContainer.innerText = "Belum ada post";
+            return;
+          }
+
+          // tampilkan posts di halaman dengan menggunakan map() dan join()
+          // untuk mengubah array posts menjadi string HTML
+          postsContainer.innerHTML = posts
+            .map(
+              (post) => `
+            <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
+              <h3>${post.title}</h3>
+              <p>${post.content}</p>
+              <img src="${post.image_url}" alt="${post.title}" />
+            </div>
+          `,
+            )
+            .join("");
+        } catch (err) {
+          postsContainer.innerText = "Error koneksi ke server";
+        }
+      }
+
+      // panggil fungsi fetchPosts() untuk mengambil posts
+      fetchPosts();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,85 @@
+---
+
+---
+
+<html>
+  <head>
+    <title>Register</title>
+  </head>
+  <body>
+    <h2>Register</h2>
+
+    <form id="registerForm">
+      <input type="text" id="name" placeholder="Nama" required />
+      <br /><br />
+
+      <input type="email" id="email" placeholder="Email" required />
+      <br /><br />
+
+      <input type="password" id="password" placeholder="Password" required />
+      <br /><br />
+
+      <input
+        type="password"
+        id="password_confirmation"
+        placeholder="Konfirmasi Password"
+        required
+      />
+      <br /><br />
+
+      <button type="submit">Register</button>
+    </form>
+
+    <p id="message"></p>
+
+    <script is="module">
+      const API_URL = import.meta.env.PUBLIC_API_URL; // ambil API_URL dari .env
+      const form = document.getElementById("registerForm");
+      const message = document.getElementById("message");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const data = {
+          name: document.getElementById("name").value,
+          email: document.getElementById("email").value,
+          password: document.getElementById("password").value,
+          password_confirmation: document.getElementById(
+            "password_confirmation",
+          ).value,
+        };
+
+        try {
+          const res = await fetch(API_URL + "/register", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            body: JSON.stringify(data),
+          });
+
+          const result = await res.json();
+
+          if (!res.ok) {
+            // error validasi Laravel
+            message.innerText = JSON.stringify(result.errors || result.message);
+            message.style.color = "red";
+            return;
+          }
+
+          message.innerText = "Register berhasil!";
+          message.style.color = "green";
+
+          // redirect ke login (opsional)
+          setTimeout(() => {
+            window.location.href = "/login";
+          }, 1500);
+        } catch (err) {
+          message.innerText = "Terjadi kesalahan koneksi";
+          message.style.color = "red";
+        }
+      });
+    </script>
+  </body>
+</html>
