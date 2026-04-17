@@ -32,54 +32,78 @@
 
     <p id="message"></p>
 
-    <script is="module">
-      const API_URL = import.meta.env.PUBLIC_API_URL; // ambil API_URL dari .env
+    <script>
+      const API_URL = import.meta.env.PUBLIC_API_URL;
       const form = document.getElementById("registerForm");
       const message = document.getElementById("message");
 
-      form.addEventListener("submit", async (e) => {
-        e.preventDefault();
+      if (form && message) {
+        form.addEventListener("submit", async (e) => {
+          e.preventDefault();
 
-        const data = {
-          name: document.getElementById("name").value,
-          email: document.getElementById("email").value,
-          password: document.getElementById("password").value,
-          password_confirmation: document.getElementById(
-            "password_confirmation",
-          ).value,
-        };
+          const data = {
+            name: (document.getElementById("name") as HTMLInputElement).value,
+            email: (document.getElementById("email") as HTMLInputElement).value,
+            password: (document.getElementById("password") as HTMLInputElement)
+              .value,
+            password_confirmation: (
+              document.getElementById(
+                "password_confirmation",
+              ) as HTMLInputElement
+            ).value,
+          };
 
-        try {
-          const res = await fetch(API_URL + "/register", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Accept: "application/json",
-            },
-            body: JSON.stringify(data),
-          });
+          try {
+            const res = await fetch(API_URL + "/register", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+              },
+              body: JSON.stringify(data),
+            });
 
-          const result = await res.json();
+            const result = await res.json();
+            console.log(result);
 
-          if (!res.ok) {
-            // error validasi Laravel
-            message.innerText = JSON.stringify(result.errors || result.message);
+            if (!res.ok) {
+              message.style.color = "red";
+              // Laravel validation errors are in an object where keys are field names.
+              let errorMessages = [];
+              for (const key in result) {
+                if (
+                  Object.prototype.hasOwnProperty.call(result, key) &&
+                  Array.isArray(result[key])
+                ) {
+                  errorMessages.push(result[key].join(" "));
+                }
+              }
+
+              if (errorMessages.length > 0) {
+                message.innerText = errorMessages.join("\n");
+              } else if (result.message) {
+                // Handle other JSON errors that have a 'message' property
+                message.innerText = result.message;
+              } else {
+                // Fallback for anything else
+                message.innerText = "An unknown error occurred.";
+              }
+              return;
+            }
+
+            message.innerText = "Register berhasil!";
+            message.style.color = "green";
+
+            // redirect ke login (opsional)
+            setTimeout(() => {
+              window.location.href = "/login";
+            }, 1500);
+          } catch (err) {
+            message.innerText = "Terjadi kesalahan koneksi";
             message.style.color = "red";
-            return;
           }
-
-          message.innerText = "Register berhasil!";
-          message.style.color = "green";
-
-          // redirect ke login (opsional)
-          setTimeout(() => {
-            window.location.href = "/login";
-          }, 1500);
-        } catch (err) {
-          message.innerText = "Terjadi kesalahan koneksi";
-          message.style.color = "red";
-        }
-      });
+        });
+      }
     </script>
   </body>
 </html>
