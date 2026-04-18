@@ -10,7 +10,7 @@
 
   <body>
     <div class="card">
-      <h2>LogiGGGGn</h2>
+      <h2>Login</h2>
 
       <form onsubmit="handleLogin(event)">
         <input type="email" id="email" placeholder="Email" required />
@@ -25,19 +25,20 @@
   </body>
 </html>
 
-<script is="module">
+<script>
   // Login form submission
   async function handleLogin(event) {
     event.preventDefault();
 
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-    const errorEl = document.getElementById("error");
-
+    const API_URL = import.meta.env.PUBLIC_API_URL;
+    const email = (document.getElementById("email") as HTMLInputElement).value;
+    const password = (document.getElementById("password") as HTMLInputElement)
+      .value;
+    const errorEl = document.getElementById("error") as HTMLElement;
     errorEl.innerText = "Loading...";
 
     try {
-      const res = await fetch("http://trade-blog-api.test/api/login", {
+      const res = await fetch(API_URL + "/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -59,6 +60,7 @@
       // redirect (misal ke dashboard)
       window.location.href = "/dashboard";
     } catch (err) {
+      console.log(err);
       errorEl.innerText = err.message;
     }
   }

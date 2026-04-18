@@ -54,7 +54,7 @@
           };
 
           try {
-            const res = await fetch(API_URL + "/register", {
+            const res = await fetch(`${API_URL}/register`, {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
@@ -63,38 +63,47 @@
               body: JSON.stringify(data),
             });
 
-            const result = await res.json();
+            let result = await res.json();
             console.log(result);
 
             if (!res.ok) {
               message.style.color = "red";
-              // Laravel validation errors are in an object where keys are field names.
-              let errorMessages = [];
-              for (const key in result) {
-                if (
-                  Object.prototype.hasOwnProperty.call(result, key) &&
-                  Array.isArray(result[key])
-                ) {
-                  errorMessages.push(result[key].join(" "));
+
+              let errorsObj = {};
+
+              // 🔥 handle kalau response string JSON
+              if (typeof result === "string") {
+                try {
+                  errorsObj = JSON.parse(result);
+                } catch {
+                  message.innerText = "Format error tidak valid";
+                  return;
                 }
+              } else if (result.errors) {
+                // 🔥 format Laravel normal
+                errorsObj = result.errors;
+              } else {
+                // fallback
+                errorsObj = result;
               }
 
-              if (errorMessages.length > 0) {
-                message.innerText = errorMessages.join("\n");
-              } else if (result.message) {
-                // Handle other JSON errors that have a 'message' property
-                message.innerText = result.message;
-              } else {
-                // Fallback for anything else
-                message.innerText = "An unknown error occurred.";
-              }
+              // 🔥 gabungkan semua pesan error
+              const errorMessages = Object.keys(errorsObj).map((field) => {
+                return `${field}: ${errorsObj[field].join(", ")}`;
+              });
+
+              message.innerText =
+                errorMessages.join("\n") ||
+                result.message ||
+                "Terjadi kesalahan";
+
               return;
             }
 
+            // ✅ sukses
             message.innerText = "Register berhasil!";
             message.style.color = "green";
 
-            // redirect ke login (opsional)
             setTimeout(() => {
               window.location.href = "/login";
             }, 1500);
