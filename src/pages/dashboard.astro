@@ -6,66 +6,82 @@
   <head>
     <title>Dashboard</title>
   </head>
+
   <body>
-    <h2>Dashboard - Posts</h2>
+    <h2>Dashboard</h2>
 
-    <div id="posts">Loading...</div>
+    <button id="logoutBtn">Logout</button>
 
-    <script is="module">
+    <div id="posts"></div>
+
+    <script>
+      const API_URL = import.meta.env.PUBLIC_API_URL;
+      const token = localStorage.getItem("token");
       const postsContainer = document.getElementById("posts");
+      const logoutBtn = document.getElementById(
+        "logoutBtn",
+      ) as HTMLButtonElement;
 
+      // 🔐 protect halaman
+      if (!token) {
+        window.location.href = "/login";
+      }
+
+      // 🚪 logout
+      logoutBtn.addEventListener("click", () => {
+        localStorage.removeItem("token");
+        window.location.href = "/login";
+      });
+
+      // 📡 ambil data posts
       async function fetchPosts() {
         try {
-          // ambil token dari localStorage
-          const token = localStorage.getItem("token");
-
-          // fetch posts dari API
-          const res = await fetch("http://trade-blog-api.test/api/posts", {
-            method: "GET",
+          const res = await fetch(API_URL + "/posts", {
             headers: {
-              Accept: "application/json",
               Authorization: "Bearer " + token,
+              Accept: "application/json",
             },
           });
 
-          // cek status response, jika tidak ok, tampilkan pesan error
-          if (!res.ok) {
-            postsContainer.innerText = "Gagal ambil data (unauthorized?)";
-            return;
-          }
-
-          // parse response ke JSON
           const result = await res.json();
           console.log(result);
 
-          // ambil data posts dari response
-          // jika tidak ada data, tampilkan pesan "Belum ada post"
-          const posts = result.data || result;
-
-          if (!posts.length) {
-            postsContainer.innerText = "Belum ada post";
+          if (!res.ok) {
+            postsContainer.innerText = result.message || "Gagal mengambil data";
             return;
           }
 
-          // tampilkan posts di halaman dengan menggunakan map() dan join()
-          // untuk mengubah array posts menjadi string HTML
-          postsContainer.innerHTML = posts
-            .map(
-              (post) => `
-            <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
-              <h3>${post.title}</h3>
-              <p>${post.content}</p>
-              <img src="${post.image_url}" alt="${post.title}" />
-            </div>
-          `,
-            )
-            .join("");
+          // 🔥 tampilkan data
+          const posts = result.data;
+
+          if (!posts || posts.length === 0) {
+            postsContainer.innerText = "Tidak ada data";
+            return;
+          }
+
+          let html = "";
+
+          posts.forEach((post) => {
+            html += `
+              <div style="border:1px solid #ccc; margin:10px; padding:10px;">
+                <p><strong>ID:</strong> ${post.id}</p>
+                <p>${post.content}</p>
+                ${
+                  post.image_url
+                    ? `<img src="${post.image_url}" width="150" />`
+                    : ""
+                }
+                <p><small>${post.created_at}</small></p>
+              </div>
+            `;
+          });
+
+          postsContainer.innerHTML = html;
         } catch (err) {
           postsContainer.innerText = "Error koneksi ke server";
         }
       }
 
-      // panggil fungsi fetchPosts() untuk mengambil posts
       fetchPosts();
     </script>
   </body>
